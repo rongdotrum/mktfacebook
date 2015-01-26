@@ -1,0 +1,20 @@
+<?php
+
+class GWGHuongdan extends CWidget {
+
+    public function init() {
+        // this method is called when the module is being created
+        // you may place code here to customize the module or the application
+        // import the module-level models and components
+    }
+
+    public function run() {
+        $process = new GNewsProcess();
+        $CatHuongdan = GConst::Cat_HuongDan;
+        $huongdan = $process->GetListNews($CatHuongdan, 4);
+        $this->render('GWGHuongdan', array('huongdan' => $huongdan));
+    }
+
+}
+
+?>

@@ -1,0 +1,90 @@
+form:not(#popup) {
+    width:540px; 
+}
+form:not(#popup) label {
+    float:left;
+    clear:left;
+    width:35%;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+    break-word:break-all;
+    text-align:right;
+    padding:16px 5px 10px;
+
+}
+form:not(#popup) input:not(.btn) {
+    width:50%; 
+     margin:12px;
+     padding-left:10px;
+     height:28px;
+     font-size:14px;
+}
+form:not(#popup) select {
+    margin:12px;
+    height:28px;
+    padding:4px 10px;
+}
+form:not(#popup) img,form:not(#popup) .btn {
+    margin-left:39%;      
+}
+form:not(#popup) .btn {
+    display:block;
+    padding:10px;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+form:not(#popup) label:not(.not_required):after {
+    content:' *';
+    color:red;
+}
+form:not(#popup) a:not(#registcaptcha_button) {
+     margin-left:220px;
+}
+#hoauthWidgetyw0 {
+    text-align: center;
+}
+#hoauthWidgetyw0:before {
+    content:'Hoặc Đăng Nhập Bằng: ';
+}
+#hoauthWidgetyw0 a{
+
+    padding: 5px 0 5px;
+    text-decoration: none;
+}
+#hoauthWidgetyw0 a.facebook{
+
+    text-decoration: none;
+}
+.zocial:before {
+    color: white;
+    content: "";
+    font: 120%/1.65 zocial;
+    margin-bottom: 3px;
+    margin-right: 5px;
+    padding: 0 0.5em;
+    text-align: center;
+    text-decoration: none;
+    text-transform: none;
+    width: 15px;
+}   
+form:not(#popup) .btn {
+    background: none repeat scroll 0 0 #431402;
+    border: 1px solid #ce5f15;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 5px 30px;
+    text-transform: uppercase;
+}
+   .btnRefreshCaptcha
+        {
+            text-indent: -9999;
+            display:inline-block;
+            margin:5px;
+            width:35px;
+            height:35px;
+            background:url('../images/refresh.png') no-repeat 0px 0px/ 35px 35px;            
+        }

@@ -1,0 +1,31 @@
+{
+    "name": "splashlab/yii-facebook-opengraph",
+    "description": "Yii1 Extension for the Facebook Open Graph 2.x and PHP SDK 4.x",
+    "keywords": ["facebook", "opengraph", "yii"],
+    "type": "library",
+    "homepage": "https://github.com/splashlab/yii-facebook-opengraph",
+    "license": "GNU Lesser General Public License v3.0",
+    "authors": [
+        {
+            "name": "SplashLab Social",
+            "homepage": "https://www.splashlabsocial.com"
+        },
+        {
+            "name": "Evan Johnson",
+            "homepage": "https://github.com/thaddeusmt"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/splashlab/yii-facebook-opengraph/issues",
+        "source": "https://github.com/splashlab/yii-facebook-opengraph"
+    },
+    "require": {
+        "php": ">=5.4",
+        "facebook/php-sdk-v4" : "4.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "YiiFacebook\\": "src/"
+        }
+    }
+}

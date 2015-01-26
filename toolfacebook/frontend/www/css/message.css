@@ -1,0 +1,51 @@
+.message {
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(255, 255, 255, 0.5) inset, 0 2px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    padding: 10px 20px;
+}
+.message h3 {
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 0;
+}
+.message p {
+    margin-bottom: 0;
+}
+.message.info {
+    background-color: #cdf;
+    background-image: -moz-linear-gradient(center top , #eef, #cdf);
+    border: 1px solid #cadcea;
+    color: #225b86;
+    text-shadow: 0 1px 1px #fff;
+}
+.message.error {
+    background-color: #fae2e2;
+    background-image: -moz-linear-gradient(center top , #fae2e2, #f2cacb);
+    border: 1px solid #eeb7ba;
+    color: #be4741;
+    text-shadow: 0 1px 1px #fff;
+}
+.message.success {
+    background-color: #e5edc4;
+    background-image: -moz-linear-gradient(center top , #e5edc4, #d9e4ac);
+    border: 1px solid #b8c97b;
+    color: #3f7227;
+    text-shadow: 0 1px 1px #fff;
+}
+.message.warning {
+    background-color: #ffffc0;
+    background-image: -moz-linear-gradient(center top , #ffffc0, #f9ee9c);
+    border: 1px solid #e5dbaa;
+    color: #6d7829;
+    text-shadow: 0 1px 1px #fff;
+}
+
+.errorSummary ul {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0) !important;
+    border: medium none !important;
+    color: #f00 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important; 
+}
