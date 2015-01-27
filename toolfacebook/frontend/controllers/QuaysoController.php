@@ -26,52 +26,28 @@ class QuaysoController extends Controller {
             $userid = app()->user->getId();
             $quayso = $this->initquayso($userid);
             $turn = (int) $quayso['turn'];
-            $turnfree = $quayso->turnfree;
-            if ($turnfree >= $this->maxfree)
-                $newday = 'Thông báo: Bạn vừa nhận 5 lượt quay miễn phí trong ngày';
+            if ($turn == 0)
+                $newday = 'Đã hết lượt quay! Hãy chia sẽ cho bạn bè để nhận tiếp lượt quay.';
             else
-                $newday = '';
-            if ($turn == 0 && $turnfree == 0)
-                $newday = 'Đã hết lượt quay! Hãy quay lại vào ngày mai hoặc nạp KNB để nhận thêm lượt quay.';
+                $newday = 'Mỗi ngày bạn được làm mới 3 lượt quay.';
     
            $item = QuaysoItem::model()->findAll();
            $user = Users::model()->findByPk($userid);
            $str_item = '';
            foreach($item as $key => $value ) {
-               $str_item .= '&item['.($key+1).']='.urlencode($value->itemname);
+               $pluskey = $key + 1;
+               $str_item .= "&item$pluskey=".urlencode($value->itemname);
            }           
-            echo "&username={$user->social_name}&turn=$turn&turnfree=$turnfree&newday=$newday".$str_item;
+            echo "&username={$user->social_name}&turn=$turn&newday=$newday".$str_item;
             die();
         } else {                        
-            if (app()->user->isGuest) {
-                $data = false;
-                goto step2;
-            }
             $userid = app()->user->getId();
-
-            
-            //kiem tra count quay so trong ngay free > 5?
-            //neu > 5
-            if ($this->checkTurNotFree()) {
-                $quayso = UsersQuayso::model()->find('userid=:userid AND turn>0', array(':userid' => $userid));
-                $data = true;
-                if ($quayso == null) {
-                    $data = false;
-                }
-            } else
-                $data = true;
-
-            step2:
-            //end
-            //else
-            // $data = true;
             /*$phanthuong = $this->listPhanThuong();
             $lichsu = $this->listHistory();
             $toppoint = $this->topGiftPoint();
             $giftoutgame = $this->giftOutGame();
             $pointcurrent = $this->pointCurrent();*/
 
-            
             $this->render('index');
             //$this->renderPartial('index', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu, 'toppoint' => $toppoint, 'giftoutgame' => $giftoutgame, 'pointcurrent' => $pointcurrent, 'thele' => $news), false, true);
             return;
@@ -83,15 +59,14 @@ class QuaysoController extends Controller {
         if ($quayso == null) {
             $quayso = new UsersQuayso();
             $quayso->userid = $userid;
-            $quayso->turn = 0;
-            $quayso->turnfree = $this->maxfree;
+            $quayso->turn = $this->maxfree;
             $quayso->datefree = new CDbExpression('NOW()');
             $quayso->save();
         } else {
             $datefree = $quayso->datefree;
             $datenow = date('Y-m-d');
             if ($datefree != $datenow) {
-                $quayso->turnfree = (int) $quayso->turnfree + (int) $this->maxfree;
+                $quayso->turn = $this->maxfree;
                 $quayso->datefree = $datenow;
                 $quayso->save();
             }
