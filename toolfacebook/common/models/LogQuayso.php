@@ -41,10 +41,10 @@ class LogQuayso extends CActiveRecord {
             array('userid, server_id, type, quantily', 'numerical', 'integerOnly' => true),
             array('username', 'length', 'max' => 50),
             array('content', 'length', 'max' => 100),
-            array('datequay', 'safe'),
+            array('datequay, codeingame,isfreeday', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            array('LogId, userid, username, content, server_id, datequay, type, quantily', 'safe', 'on' => 'search'),
+            array('LogId, userid, username, content, server_id, datequay, type, quantily, codeingame, isfreeday', 'safe', 'on' => 'search'),
         );
     }
 
@@ -72,6 +72,8 @@ class LogQuayso extends CActiveRecord {
             'datequay' => 'Datequay',
             'type' => 'Type',
             'quantily' => 'Quantily',
+            'codeingame' => 'CodeInGame',
+            'isfreeday' => 'IsFreeDay'
         );
     }
 
@@ -93,6 +95,9 @@ class LogQuayso extends CActiveRecord {
         $criteria->compare('datequay', $this->datequay, true);
         $criteria->compare('type', $this->type);
         $criteria->compare('quantily', $this->quantily);
+        $criteria->compare('codeingame', $this->codeingame);
+        $criteria->compare('isfreeday', $this->isfreeday);
+        $criteria->order = 'datequay desc';
 
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,
@@ -100,4 +105,3 @@ class LogQuayso extends CActiveRecord {
     }
 
 }
-

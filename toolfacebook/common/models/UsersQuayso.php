@@ -6,8 +6,9 @@
  * The followings are the available columns in table 'users_quayso':
  * @property integer $id
  * @property integer $userid
- * @property integer $server_id
  * @property integer $turn
+ * @property integer $turnfree
+ * @property string $datefree
  */
 class UsersQuayso extends CActiveRecord
 {
@@ -37,10 +38,11 @@ class UsersQuayso extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('userid, server_id, turn', 'numerical', 'integerOnly'=>true),
+			array('userid, turn, turnfree', 'numerical', 'integerOnly'=>true),
+			array('datefree', 'safe'),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, userid, server_id, turn', 'safe', 'on'=>'search'),
+			array('id, userid, turn, turnfree, datefree', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -63,8 +65,9 @@ class UsersQuayso extends CActiveRecord
 		return array(
 			'id' => 'ID',
 			'userid' => 'Userid',
-			'server_id' => 'Server',
 			'turn' => 'Turn',
+			'turnfree' => 'Turnfree',
+			'datefree' => 'Datefree',
 		);
 	}
 
@@ -81,8 +84,9 @@ class UsersQuayso extends CActiveRecord
 
 		$criteria->compare('id',$this->id);
 		$criteria->compare('userid',$this->userid);
-		$criteria->compare('server_id',$this->server_id);
 		$criteria->compare('turn',$this->turn);
+		$criteria->compare('turnfree',$this->turnfree);
+		$criteria->compare('datefree',$this->datefree,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,

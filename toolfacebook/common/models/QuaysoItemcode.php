@@ -1,23 +1,20 @@
 <?php
 
 /**
- * This is the model class for table "quayso_item".
+ * This is the model class for table "quayso_itemcode".
  *
- * The followings are the available columns in table 'quayso_item':
+ * The followings are the available columns in table 'quayso_itemcode':
+ * @property integer $id
  * @property integer $itemid
- * @property string $itemname
- * @property integer $count
- * @property string $percent
- * @property string $codeingame
- * @property integer $typeitem
- * @property integer $limititem
+ * @property string $codeid
+ * @property integer $del_flag
  */
-class QuaysoItem extends CActiveRecord {
+class QuaysoItemcode extends CActiveRecord {
 
     /**
      * Returns the static model of the specified AR class.
      * @param string $className active record class name.
-     * @return QuaysoItem the static model class
+     * @return QuaysoItemcode the static model class
      */
     public static function model($className = __CLASS__) {
         return parent::model($className);
@@ -27,7 +24,7 @@ class QuaysoItem extends CActiveRecord {
      * @return string the associated database table name
      */
     public function tableName() {
-        return 'quayso_item';
+        return 'quayso_itemcode';
     }
 
     /**
@@ -37,12 +34,12 @@ class QuaysoItem extends CActiveRecord {
         // NOTE: you should only define rules for those attributes that
         // will receive user inputs.
         return array(
-            array('count, typeitem, limititem,percent', 'numerical', 'integerOnly' => true),
-            array('itemname', 'length', 'max' => 100),
-            array('codeingame', 'safe'),
+            array('del_flag', 'numerical', 'integerOnly' => true),
+            array('codeid', 'length', 'max' => 20),
+            array('itemid', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            array('itemid, itemname, count, percent, codeingame, typeitem, limititem', 'safe', 'on' => 'search'),
+            array('id, itemid, codeid, del_flag', 'safe', 'on' => 'search'),
         );
     }
 
@@ -61,13 +58,10 @@ class QuaysoItem extends CActiveRecord {
      */
     public function attributeLabels() {
         return array(
+            'id' => 'ID',
             'itemid' => 'Itemid',
-            'itemname' => 'Itemname',
-            'count' => 'Count',
-            'percent' => 'Percent',
-            'codeingame' => 'Codeingame',
-            'typeitem' => 'Typeitem',
-            'limititem' => 'Limititem',
+            'codeid' => 'Codeid',
+            'del_flag' => 'Del Flag',
         );
     }
 
@@ -81,13 +75,10 @@ class QuaysoItem extends CActiveRecord {
 
         $criteria = new CDbCriteria;
 
+        $criteria->compare('id', $this->id);
         $criteria->compare('itemid', $this->itemid);
-        $criteria->compare('itemname', $this->itemname, true);
-        $criteria->compare('count', $this->count);
-        $criteria->compare('percent', $this->percent, true);
-        $criteria->compare('codeingame', $this->codeingame, true);
-        $criteria->compare('typeitem', $this->typeitem);
-        $criteria->compare('limititem', $this->limititem);
+        $criteria->compare('codeid', $this->codeid, true);
+        $criteria->compare('del_flag', $this->del_flag);
 
         return new CActiveDataProvider($this, array(
             'criteria' => $criteria,
