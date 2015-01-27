@@ -11,7 +11,7 @@ class Controller extends CController {
 
     public $breadcrumbs = array();
     public $menu = array();
-    //public $layout = '//layouts/g4g_3colum';
+    public $layout = '//layouts/main';
     public $title = '';
     public $_description = '';
     public $_keywords = '';
@@ -23,8 +23,12 @@ class Controller extends CController {
 
     public function init() {
         
-        $this->loginfacebook();
-        $this->getAssetsUrl();                
+      
+        
+        if (Yii::app()->user->isGuest)
+            $this->loginfacebook();
+           
+       // $this->getAssetsUrl();                
     //    $this->getMetaHeader();      
         parent::init();
     }
