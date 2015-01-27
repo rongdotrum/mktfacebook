@@ -14,17 +14,9 @@ class QuaysoController extends Controller {
         );
     }
 
-    //    public function actionIndex() {
-    //        if (app()->user->isGuest) {
-    //            app()->user->setReturnUrl(app()->request->url);
-    //            app()->user->setFlash('error', t('COM_ERR_NOT_LOGIN'));
-    //            $this->redirect(app()->createUrl('user/login'));
-    //        }
-    //        $this->redirect(app()->createUrl('quayso/quayso'));
-    //    }
     private $maxfree = 5;
 
-    public function actionIndex() {
+    public function actionIndex() {           
         if (app()->user->isGuest) {
             app()->user->setReturnUrl(app()->request->url);
         }
@@ -41,16 +33,23 @@ class QuaysoController extends Controller {
                 $newday = '';
             if ($turn == 0 && $turnfree == 0)
                 $newday = 'Đã hết lượt quay! Hãy quay lại vào ngày mai hoặc nạp KNB để nhận thêm lượt quay.';
-            echo("&username=$username&turn=$turn&turnfree=$turnfree&newday=$newday&item1=mockhoa&item2=...item9");
+    
+           $item = QuaysoItem::model()->findAll();
+           $user = Users::model()->findByPk($userid);
+           $str_item = '';
+           foreach($item as $key => $value ) {
+               $str_item .= '&item['.($key+1).']='.urlencode($value->itemname);
+           }           
+            echo "&username={$user->social_name}&turn=$turn&turnfree=$turnfree&newday=$newday".$str_item;
             die();
-        } else {
+        } else {                        
             if (app()->user->isGuest) {
                 $data = false;
                 goto step2;
             }
             $userid = app()->user->getId();
 
-
+            
             //kiem tra count quay so trong ngay free > 5?
             //neu > 5
             if ($this->checkTurNotFree()) {
@@ -66,19 +65,15 @@ class QuaysoController extends Controller {
             //end
             //else
             // $data = true;
-            $phanthuong = $this->listPhanThuong();
+            /*$phanthuong = $this->listPhanThuong();
             $lichsu = $this->listHistory();
             $toppoint = $this->topGiftPoint();
             $giftoutgame = $this->giftOutGame();
-            $pointcurrent = $this->pointCurrent();
+            $pointcurrent = $this->pointCurrent();*/
 
-            /** lay the le quay so * */
-            $news = array();
-            $cat = NewsCat::model()->find('cataction = :paction and status = 1', array(':paction' => 'thelequayso'));
-            if (!empty($cat))
-                $news = News::model()->find('catid = :pcatid', array(':pcatid' => $cat->CatId));
-
-            $this->renderPartial('quaysoevent', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu, 'toppoint' => $toppoint, 'giftoutgame' => $giftoutgame, 'pointcurrent' => $pointcurrent, 'thele' => $news), false, true);
+            
+            $this->render('index');
+            //$this->renderPartial('index', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu, 'toppoint' => $toppoint, 'giftoutgame' => $giftoutgame, 'pointcurrent' => $pointcurrent, 'thele' => $news), false, true);
             return;
         }
     }
