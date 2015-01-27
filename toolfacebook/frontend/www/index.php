@@ -41,7 +41,7 @@ defined('TIMENOW') or define('TIMENOW', time());
 defined('TYPE_INT') or define('TYPE_INT', 2); // force integer
 defined('TYPE_STR') or define('TYPE_STR', 7); // force trimmed string
 defined('REQ_PROTOCOL') or define('REQ_PROTOCOL', 'http'); // scheme
-CSystemConfig::GetAllSysConfig();  
+
 $app->run();
 
 /* uncomment if you wish to debug your resulting config */
