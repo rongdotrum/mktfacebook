@@ -10,6 +10,7 @@ Yii::setPathOfAlias('common', __DIR__ . '/../../common');
 
 return CMap::mergeArray(
                 array(
+            'timeZone' => 'Asia/Ho_Chi_Minh',
             'import' => array(
                 'common.components.*',
                 'common.models.*',
