@@ -31,12 +31,14 @@ class QuaysoController extends Controller {
             else
                 $newday = 'Mỗi ngày bạn được làm mới 3 lượt quay.';
     
-           $item = QuaysoItem::model()->findAll();
+           $item = Quayso::model()->findAll();
            $user = Users::model()->findByPk($userid);
            $str_item = '';
            foreach($item as $key => $value ) {
-               $pluskey = $key + 1;
-               $str_item .= "&item$pluskey=".urlencode($value->itemname);
+              if (isset($value->items->itemname)) {                
+                    $pluskey = $value->position;
+                    $str_item .= "&item$pluskey=".urlencode($value->items->count.' '.$value->items->itemname);
+               }
            }           
             echo "&username={$user->social_name}&turn=$turn&newday=$newday".$str_item;
             die();
