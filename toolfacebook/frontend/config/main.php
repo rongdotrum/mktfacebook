@@ -15,6 +15,7 @@ Yii::setPathOfAlias('YiiFacebook', __DIR__ . '/../extensions/YiiFacebook');
 
 return CMap::mergeArray(
     require(__DIR__ . '/../../common/config/main.php'), array(
+         'defaultController' => 'quayso',
         // @see http://www.yiiframework.com/doc/api/1.1/CApplication#basePath-detail
         'basePath' => 'frontend',
         // set parameters
@@ -44,7 +45,7 @@ return CMap::mergeArray(
         /* uncomment and set if required */
         // @see http://www.yiiframework.com/doc/api/1.1/CModule#setModules-detail
         'modules' => array(
-			'appschangioi'
+			''
 		),
         'components' => array(
              'facebook'=>array(
