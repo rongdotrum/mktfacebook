@@ -8,205 +8,314 @@
 
 class QuaysoController extends Controller {
 
-    
-
     public function accessRules() {
 
         return array(
         );
     }
 
+    //    public function actionIndex() {
+    //        if (app()->user->isGuest) {
+    //            app()->user->setReturnUrl(app()->request->url);
+    //            app()->user->setFlash('error', t('COM_ERR_NOT_LOGIN'));
+    //            $this->redirect(app()->createUrl('user/login'));
+    //        }
+    //        $this->redirect(app()->createUrl('quayso/quayso'));
+    //    }
+    private $maxfree = 5;
+
     public function actionIndex() {
-        
-        if(isset(Yii::app()->params['sysconfig']['flg_quayso']))
-            $sys = Yii::app()->params['sysconfig']['flg_quayso'];           
-        if (!isset($sys) || $sys != '1')
-        {
-            if (Yii::app()->request->isAjaxRequest)
-                die('Hoạt động này chưa mở');
-            else
-                $this->render('index',array('message'=>'Hoạt động quay số chưa mở'));           
-        }   
-        
-        
         if (app()->user->isGuest) {
             app()->user->setReturnUrl(app()->request->url);
-            app()->user->setFlash('error', t('COM_ERR_NOT_LOGIN'));
-            $this->redirect(app()->createUrl('user/login'));
         }
-        $this->render('/quayso/chonserver');
+
+        if (isset($_POST['game_code']) && $_POST['game_code'] == '!@#cuongma#@!') {
+            $username = app()->user->getName();
+            $userid = app()->user->getId();
+            $quayso = $this->initquayso($userid);
+            $turn = (int) $quayso['turn'];
+            $turnfree = $quayso->turnfree;
+            if ($turnfree >= $this->maxfree)
+                $newday = 'Thông báo: Bạn vừa nhận 5 lượt quay miễn phí trong ngày';
+            else
+                $newday = '';
+            if ($turn == 0 && $turnfree == 0)
+                $newday = 'Đã hết lượt quay! Hãy quay lại vào ngày mai hoặc nạp KNB để nhận thêm lượt quay.';
+            echo("&username=$username&turn=$turn&turnfree=$turnfree&newday=$newday&item1=mockhoa&item2=...item9");
+            die();
+        } else {
+            if (app()->user->isGuest) {
+                $data = false;
+                goto step2;
+            }
+            $userid = app()->user->getId();
+
+
+            //kiem tra count quay so trong ngay free > 5?
+            //neu > 5
+            if ($this->checkTurNotFree()) {
+                $quayso = UsersQuayso::model()->find('userid=:userid AND turn>0', array(':userid' => $userid));
+                $data = true;
+                if ($quayso == null) {
+                    $data = false;
+                }
+            } else
+                $data = true;
+
+            step2:
+            //end
+            //else
+            // $data = true;
+            $phanthuong = $this->listPhanThuong();
+            $lichsu = $this->listHistory();
+            $toppoint = $this->topGiftPoint();
+            $giftoutgame = $this->giftOutGame();
+            $pointcurrent = $this->pointCurrent();
+
+            /** lay the le quay so * */
+            $news = array();
+            $cat = NewsCat::model()->find('cataction = :paction and status = 1', array(':paction' => 'thelequayso'));
+            if (!empty($cat))
+                $news = News::model()->find('catid = :pcatid', array(':pcatid' => $cat->CatId));
+
+            $this->renderPartial('quaysoevent', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu, 'toppoint' => $toppoint, 'giftoutgame' => $giftoutgame, 'pointcurrent' => $pointcurrent, 'thele' => $news), false, true);
+            return;
+        }
     }
 
-    public function actionServers() {
-
-       if(isset(Yii::app()->params['sysconfig']['flg_quayso']))
-            $sys = Yii::app()->params['sysconfig']['flg_quayso'];        
-        if (!isset($sys) || $sys != '1')
-        {
-            if (Yii::app()->request->isAjaxRequest)
-                die('Hoạt động này chưa mở');
-            else
-                $this->render('index',array('message'=>'Hoạt động quay số chưa mở'));           
-        }   
-        
-        
-        
-        if (app()->user->isGuest) {
-            app()->user->setReturnUrl(app()->request->url);
-            app()->user->setFlash('error', t('COM_ERR_NOT_LOGIN'));
-            $this->redirect(app()->createUrl('user/login'));
-        }        
-        if (isset($_POST['game_code']) && $_POST['game_code'] == 'vieautog4g$#@!') {
-
-            $server_id = $_POST['server_id'];
-            $server = Servers::model()->find('server_id=:server_id', array(':server_id' => $server_id));
-            if ($server['status'] != 1)
-                $this->redirect(app()->createUrl('site'));
-            $urlService = $server['rechargeUrl'] . param('ingame')['serviceUrl'];
-            //$urlService = 'http://localhost/ttq/trunk/source/gameservices/' . param('ingame')['serviceUrl'];
-            $username = app()->user->getId(); //GHelpers::EncryptAccountName(app()->user->getName(), app()->user->getId());
-            $userid = app()->user->getId();
-            $key = param('gold')['key'];
-            $sign = md5($username . $key);
-            $params = array('username' => $username,'dbname'=>$server->dbname, 'sign' => $sign);
-            ini_set('soap.wsdl_cache_enable', 0);
-            ini_set('soap.wsdl_cache_ttl', 0);
-            $client = new SoapClient(null, array('location' => $urlService, 'uri' => "localhost"));
-            // check user
-            $result = $client->__soapCall('GetPlayerInfo', $params);
-            if ($result == array())
-                die('chưa tạo nhân vật');
-            $player = $result[0]['NAME'];
-            $quayso = UsersQuayso::model()->find('userid=:userid AND server_id=:server_id', array(':userid' => $userid, ':server_id' => $server_id));
-            $turn = $quayso['turn'];
-            $servername = $server['server_name'];
-            echo("&username=$player&turn=$turn&servername=$servername");
-            die();
+    private function initquayso($userid) {
+        $quayso = UsersQuayso::model()->find('userid=:userid', array(':userid' => $userid));
+        if ($quayso == null) {
+            $quayso = new UsersQuayso();
+            $quayso->userid = $userid;
+            $quayso->turn = 0;
+            $quayso->turnfree = $this->maxfree;
+            $quayso->datefree = new CDbExpression('NOW()');
+            $quayso->save();
+        } else {
+            $datefree = $quayso->datefree;
+            $datenow = date('Y-m-d');
+            if ($datefree != $datenow) {
+                $quayso->turnfree = (int) $quayso->turnfree + (int) $this->maxfree;
+                $quayso->datefree = $datenow;
+                $quayso->save();
+            }
         }
-        else {            
-            $userid = app()->user->getId();
-            $server_id = app()->request->getParam('ID');
-            $quayso = UsersQuayso::model()->find('userid=:userid AND server_id=:server_id AND turn>0', array(':userid' => $userid, ':server_id' => $server_id));
-            $data = true;
-            if ($quayso == null)
-                $data = false;
-            if ($server_id == '')
-                $this->redirect(app()->createUrl('site'));
-            $this->layout = '//layouts/main_quayso';
-            $phanthuong = $this->listPhanThuong();
-            $lichsu = $this->listHistory($server_id);
-            $this->render('/quayso/quayso', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu));
-        }
+        return $quayso;
     }
 
     public function actionPhatthuong() {
-                
-        if(isset(Yii::app()->params['sysconfig']['flg_quayso']))
-            $sys = Yii::app()->params['sysconfig']['flg_quayso'];                
-        if (!isset($sys) || $sys != '1')
-        {
-            if (Yii::app()->request->isAjaxRequest)
-                die('Hoạt động này chưa mở');
-            else
-                $this->render('index',array('message'=>'Hoạt động quay số chưa mở'));           
-        }   
-        
-        
         if (app()->user->isGuest) {
             die();
         }
-        if (isset($_POST['game_code']) && $_POST['game_code'] == 'vieautog4g$#@!') {
+        if (isset($_POST['game_code']) && $_POST['game_code'] == '!@#cuongma#@!') {
+            //kiem tra count quay so trong ngay free > 5?
+            //neu > 5 && khong co turn nao từ nạp card
+            // die();
             $userid = app()->user->getId();
-            $server_id = $_POST['server_id'];
-            $player = $_POST['player'];
-            $quaysoitem = QuaysoItem::model()->findAll('idingame=0 and percent != 0');
-            $process = new GQuaysoProcess();
-            $randint = rand(1, 1000);
-            $type = 'GOLD';
-            $idingame = 0;
-            $item = array();
-            
-            if ($randint <= (int) $quaysoitem[0]['percent']) {
-                $item = $process->getItemLevel($quaysoitem[0]['percent'], $idingame);
-            } 
-            elseif (count($quaysoitem)==1)
-            {
-                $item = $process->getItemLevel($quaysoitem[0]['percent'], $idingame);
-            }
-            elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] && $randint > $quaysoitem[0]['percent']) {
-                $item = $process->getItemLevel($quaysoitem[1]['percent'], $idingame);
-            } elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent'] && $randint > (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent']) {
-                $item = $process->getItemLevel($quaysoitem[2]['percent'], $idingame);
-            } elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent'] + (int) $quaysoitem[3]['percent'] && $randint > (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent']) {
-                $item = $process->getItemLevel($quaysoitem[3]['percent'], $idingame);
-            } else {
-                $item = $process->getItemLevel($quaysoitem[4]['percent'], $idingame);
-            }           
-            if ($type == 'GOLD') {
-                $quayso_return = new UsersQuayso();
-                $quayso_return = $quayso_return->find('userid=:userid AND server_id=:server_id', array(':userid' => $userid, ':server_id' => $server_id));
-                if ($quayso_return->turn <= 0)
-                    die();
-                $itemid = $item['itemid'];
-                $nameitem = $item['itemname'];
-                $gold = $item['count'];
-                $server = Servers::model()->find('server_id=:server_id', array(':server_id' => $server_id));
-                ini_set('soap.wsdl_cache_enable', 0);
-                ini_set('soap.wsdl_cache_ttl', 0);
-                $urlService = $server['rechargeUrl'] . param('gold')['serviceUrl'];                
-                $client = new SoapClient(null, array('location' => $urlService, 'uri' => "localhost"));
-                $key = param('gold')['key'];
-                $golden = $gold;
-                $serverId = $server_id;
-                $uname = app()->user->getId();//GHelpers::EncryptAccountName(app()->user->getName(), app()->user->getId());
-                $sign = md5($uname . $golden . $key);
-                $data = $client->__soapCall('naptien', array('uname' => $uname, 'golden' => $golden, 'dbname'=>$server->dbname, 'sign' => $sign));          
-                //$data = explode('.', $data);
-                $code = $data;
-                if ($code == 1 && $golden > 0) {
 
-                    $quayso_return->turn = $quayso_return->turn - 1;
-                    $quayso_return->save();
-                    $quayso = Quayso::model()->findAll('itemid=:itemid', array(':itemid' => $itemid));   
-                    while (true) {
-                        $rd = rand(0, sizeof($quayso) - 1);
-                        $position = $quayso[$rd]['position'];
-                        if ($position != 1)
-                            break;
-                    }
-                    
-                    $logquayso = new LogQuayso();
-                    $logquayso->userid = $userid;
-                    $logquayso->username = app()->user->getName();
-                    $logquayso->content = number_format($gold) . '-' . $nameitem;
-                    $logquayso->server_id = $server_id;
-                    $logquayso->datequay = new CDbExpression('NOW()');
-                    if ($item['idingame'] == 0)
-                        $logquayso->type = 0;
-                    else
-                        $logquayso->type = 1;
-                    $logquayso->quantily = $gold;
-                    $logquayso->save();
-                    echo("&prize=$position");
+            if ($this->checkTurNotFree()) {
+                $quayso = UsersQuayso::model()->find('userid=:userid AND turn>0', array(':userid' => $userid));
+                if ($quayso == null) {
                     die();
                 }
-            } else {
-
             }
+            //end
+            $process = new GQuaysoProcess();
+            $quaysoitem = $process->getListPercent();
+            $max = 0;
+            foreach ($quaysoitem as $value) {
+                $max += (int) $value['percent'];
+            }
+            randquayso:
+            $randint = rand(1, $max);
+            //$idingame = 0;
+            $item = array();
+            //$item = $process->getItemLevel($quaysoitem[0]['percent']);
+            $temp2 = 0;
+            for ($i = 0; $i < sizeof($quaysoitem); $i++) {
+                if ($i == 0)
+                    $temp1 = 0;
+                else
+                    $temp1 += $quaysoitem[$i - 1]['percent'];
+
+                $temp2 = $temp1 + $quaysoitem[$i]['percent'];
+                if ($randint >= $temp1 && $randint <= $temp2) {
+                    $item = $process->getItemLevel($quaysoitem[$i]['percent']);
+                    if ((int) $item['typeitem'] != 0) {
+                        if ((int) $item['limititem'] <= 0 || (int) $item['percent'] == 0)
+                            goto randquayso;
+                        else {
+                            //tru limititem
+                            if (!$process->SubLimitItem($item['itemid']))
+                                die('quá trình trừ số lượng thất bại');
+                        }
+                    }
+                }
+            }
+            /* if ($randint <= (int) $quaysoitem[0]['percent']) {
+              $item = $process->getItemLevel($quaysoitem[0]['percent']);
+              } elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] && $randint > $quaysoitem[0]['percent']) {
+              $item = $process->getItemLevel($quaysoitem[1]['percent']);
+              } elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent'] && $randint > (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent']) {
+              $item = $process->getItemLevel($quaysoitem[2]['percent']);
+              } elseif ($randint <= (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent'] + (int) $quaysoitem[3]['percent'] && $randint > (int) $quaysoitem[0]['percent'] + (int) $quaysoitem[1]['percent'] + (int) $quaysoitem[2]['percent']) {
+              $item = $process->getItemLevel($quaysoitem[3]['percent']);
+              } else {
+              $item = $process->getItemLevel($quaysoitem[4]['percent']);
+              } */
+
+
+            $itemid = $item['itemid'];
+            $quayso = Quayso::model()->find('itemid=:itemid', array(':itemid' => $itemid));
+            $position = $quayso['position'];
+            $nameitem = $item['itemname'];
+            $code = $item['codeingame'];
+            $content = $item['count'] . '- ' . $nameitem;
+            if ($item['typeitem'] == 1) {
+                $code = $this->getCode($item['codeingame']);
+                if ($code == '') {
+                    echo("&prize=$position&contentrs=$content&coders=hết code để phát");
+                    die();
+                }
+            }
+            // tru luot quay so
+            
+            $checkturnnotfree = $this->checkTurNotFree();
+            
+            if ($checkturnnotfree) {
+                $quayso_return = new UsersQuayso();
+                $quayso_return = $quayso_return->find('userid=:userid AND turn > 0', array(':userid' => $userid));
+                $quayso_return->turn = $quayso_return->turn - 1;
+                $quayso_return->save();
+            } else {
+                $quayso_return = new UsersQuayso();
+                $quayso_return = $quayso_return->find('userid=:userid AND turnfree > 0', array(':userid' => $userid));
+                $quayso_return->turnfree = $quayso_return->turnfree - 1;
+                $quayso_return->save();
+            }
+            //            while (true) {
+            //                $rd = rand(0, sizeof($quayso) - 1);
+            //                $position = $quayso[$rd]['position'];
+            //                if ($position != 1)
+            //                    break;
+            //            }
+            //end
+            //luu log quay so
+
+            $logquayso = new LogQuayso();
+            $logquayso->userid = $userid;
+            $logquayso->username = app()->user->getName();
+            $logquayso->content = $content;
+            $logquayso->datequay = new CDbExpression('NOW()');
+            $logquayso->type = $item['typeitem'];
+            $logquayso->quantily = $item['count'];
+            $logquayso->codeingame = $code;
+            //kiem tra count quay so trong ngay free > 5?
+            //neu > 5
+            if ($checkturnnotfree)
+                $logquayso->isfreeday = 0;
+            //else
+            else
+                $logquayso->isfreeday = 1;
+            $logquayso->save();
+            //end
+            //truyen bien ve flash
+            echo("&prize=$position&contentrs=$content&coders=$code");
+            die();
+
+            //end
         }
     }
 
     public function listPhanThuong() {
-        $quayso = new QuaySo('Search');
-        return $quayso;
+        /*
+          $checkpercent = QuaysoItem::model()->find('percent != 0 AND typeitem = 2');
+
+          if ($checkpercent == null)
+          $sql = 'select it.*,qs.position from quayso as qs inner join (
+          (select itemname,itemid,count from quayso_item where percent !=0  and typeitem != 2)
+          union (select itemname,itemid,count from quayso_item where percent =0  and typeitem = 2 order by rand() limit 1)
+          ) as it on it.itemid = qs.itemid order by position asc';
+          else
+          $sql = 'select *,it.itemname from quayso as qs inner join (
+          (select itemname,itemid,count from quayso_item where percent !=0)
+          ) as it on it.itemid = qs.itemid order by position asc';
+          $data = new CSqlDataProvider($sql, array(
+          'keyField' => 'itemid',
+          ));
+         */
+        $data = new Quayso('Search');
+        return $data;
     }
 
-    public function listHistory($serverid) {
+    public function listHistory() {
+        if (app()->user->isGuest)
+            return null;
         $logquayso = new LogQuayso('Search');
-        $logquayso->server_id = $serverid;
         $logquayso->userid = app()->user->getId();
         return $logquayso;
     }
-    
-}
 
+    public function giftOutGame() {
+        $model = new LogQuayso('Search');
+        $model->type = 2;
+        return $model;
+    }
+
+    public function topGiftPoint() {
+        $sql = 'select sum(quantily) as total,username
+        from log_quayso
+        where type = 0
+        group by userid
+        order by total desc';
+
+        $data = new CSqlDataProvider($sql, array(
+            'keyField' => 'username',
+            'totalItemCount' => 10,
+            'pagination' => array(
+                'pageSize' => 10,
+            ),
+        ));
+        return $data;
+    }
+
+    private function checkTurNotFree() {
+        $quayso = new UsersQuayso();
+        $quayso = $quayso->find('userid=:userid', array(':userid' => app()->user->getId()));
+        if ($quayso == null)
+            return false;
+        if ($quayso->datefree != date('Y-m-d'))
+            return false;
+        $turnfree = (int) $quayso->turnfree;
+        return $turnfree == 0;
+    }
+
+    private function getCode($itemid) {
+        $code = QuaysoItemcode::model()->find('itemid=:itemid AND (del_flag <> 1 OR del_flag is null)', array(':itemid' => $itemid));
+        if ($code == null)
+            return '';
+        $code->del_flag = 1;
+        $code->save();
+        return $code['codeid'];
+    }
+
+    private function pointCurrent() {
+        if (app()->user->isGuest)
+            return 0;
+        $crit = new CDbCriteria();
+        $crit->select = 'sum(quantily) as quantily';
+        $crit->compare('userid', app()->user->id);
+        $crit->compare('type', 0);
+        $crit->group = 'userid';
+        $data = LogQuayso::model()->find($crit);
+        return $data['quantily'];
+    }
+    public function actiontichluy() {
+        if (app()->request->isAjaxRequest && !app()->user->isGuest){
+             $pointcurrent = $this->pointCurrent();  
+             echo 'Điểm Tích Lũy: '.number_format($pointcurrent);
+        }
+    }
+
+}

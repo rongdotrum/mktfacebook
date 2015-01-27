@@ -16,6 +16,12 @@ class GQuaysoProcess extends GBaseBusinessProcess {
 
     }
 
+    public function SubLimitItem($itemid) {
+        $item = QuaysoItem::model()->find('itemid=:itemid', array(':itemid' => $itemid));
+        $item->limititem = (int) $item->limititem - 1;
+        return $item->save();
+    }
+
     public function getTongGoldNap($userid, $server_id) {
         $Criteria = new CDbCriteria();
         $Criteria->select = 'sum(gold) as gold';
@@ -26,12 +32,25 @@ class GQuaysoProcess extends GBaseBusinessProcess {
         return $Logpayment['gold'];
     }
 
-    public function getItemLevel($percent, $idingame) {
+    public function getItemLevel($percent) {
         $Criteria = new CDbCriteria();
-        $Criteria->condition = 'idingame=:idingame AND percent=:percent';
-        $Criteria->params = array(':idingame' => $idingame, ':percent' => $percent);
+        $Criteria->condition = 'percent=:percent';
+        $Criteria->params = array(':percent' => $percent);
         $QuaysoItem = new QuaysoItem();
-        $QuaysoItem = $QuaysoItem->find($Criteria);
+        $QuaysoItem = $QuaysoItem->findAll($Criteria);
+        $count = sizeof($QuaysoItem);
+        if ($count == 1)
+            return $QuaysoItem[0];
+        $rd = rand(0, $count - 1);
+        return $QuaysoItem[$rd];
+    }
+
+    public function getListPercent() {
+        $Criteria = new CDbCriteria();
+        $Criteria->select = 'DISTINCT percent';
+        $Criteria->condition = 'percent <> 0';
+        $QuaysoItem = new QuaysoItem();
+        $QuaysoItem = $QuaysoItem->findAll($Criteria);
         return $QuaysoItem;
     }
 
