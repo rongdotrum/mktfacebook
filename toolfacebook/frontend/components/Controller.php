@@ -66,6 +66,7 @@ class Controller extends CController {
         else {
             $loginurl = $fb->getLoginUrl(null,array('email'));         
             $this->redirect($loginurl);
+            Yii::app()->end;
         }
     }
     protected function afterRender($view, &$output) {
