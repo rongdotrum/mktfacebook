@@ -68,5 +68,12 @@ class Controller extends CController {
             $this->redirect($loginurl);
         }
     }
+    protected function afterRender($view, &$output) {
+        parent::afterRender($view,$output);
+        //Yii::app()->facebook->addJsCallback($js); // use this if you are registering any additional $js code you want to run on init()
+        Yii::app()->facebook->initJs($output); // this initializes the Facebook JS SDK on all pages
+        // Yii::app()->facebook->renderOGMetaTags(); // this renders the OG tags
+        return true;
+    }
 
 }
