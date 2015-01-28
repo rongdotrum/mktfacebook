@@ -27,10 +27,11 @@ class QuaysoController extends Controller {
             $userid = app()->user->getId();
             $quayso = $this->initquayso($userid);
             $turn = (int) $quayso['turn'];
+            $shared = (int)$quayso['turnfree'];
             if ($turn == 0)
                 $newday = 'Đã hết lượt quay! Hãy chia sẽ cho bạn bè để nhận tiếp lượt quay.';
             else
-                $newday = 'Mỗi ngày bạn được làm mới 3 lượt quay. Bạn có thể share thêm ' . $this->maxshare . ' lần. Mỗi lần nhận được ' . $this->maxfree . ' lượt quay miễn phí.' ;
+                $newday = 'Mẹo nhỏ: Mỗi ngày bạn được nhận 3 lượt quay. Bạn có thể share thêm ' . $this->maxshare . ' lần. Mỗi lần share nhận được ' . $this->maxfree . ' lượt quay miễn phí.' ;
 
             $item = Quayso::model()->findAll();
             $user = Users::model()->findByPk($userid);
@@ -41,7 +42,7 @@ class QuaysoController extends Controller {
                     $str_item .= "&item$pluskey=".urlencode($value->items->count.' '.$value->items->itemname);
                 }
             }           
-            echo "&username={$user->social_name}&turn=$turn&newday=$newday".$str_item;
+            echo "&share=$shared&username={$user->social_name}&turn=$turn&newday=$newday".$str_item;
             die();
         } else {                        
             $userid = app()->user->getId();
