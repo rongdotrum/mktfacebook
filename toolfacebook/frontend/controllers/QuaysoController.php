@@ -15,6 +15,7 @@ class QuaysoController extends Controller {
     }
 
     private $maxfree = 3;
+    private $maxshare = 2;
 
     public function actionIndex() {           
         if (app()->user->isGuest) {
@@ -29,7 +30,7 @@ class QuaysoController extends Controller {
             if ($turn == 0)
                 $newday = 'Đã hết lượt quay! Hãy chia sẽ cho bạn bè để nhận tiếp lượt quay.';
             else
-                $newday = 'Mỗi ngày bạn được làm mới 3 lượt quay.';
+                $newday = 'Mỗi ngày bạn được làm mới 3 lượt quay. Bạn có thể share thêm ' . $this->maxshare . ' lần. Mỗi lần nhận được ' . $this->maxfree . ' lượt quay miễn phí.' ;
 
             $item = Quayso::model()->findAll();
             $user = Users::model()->findByPk($userid);
@@ -276,9 +277,9 @@ class QuaysoController extends Controller {
 
     public function actionSharefb() {
         if (!Yii::app()->user->isGuest && Yii::app()->request->isAjaxRequest) {
-            $quayso = UsersQuayso::model()->find('userid = :uid and (turnfree = 0 or turnfree is null) and datefree = date(now())',array(':uid'=>Yii::app()->user->getId()));
+            $quayso = UsersQuayso::model()->find('userid = :uid and (turnfree < :maxshare or turnfree is null) and datefree = date(now())',array(':uid'=>Yii::app()->user->getId(),':maxshare' => $this->maxshare));
             if (isset($quayso->id)) {
-                $quayso->turnfree = 1;
+                $quayso->turnfree = $quayso->turnfree + 1;
                 $quayso->turn += 3;
                 if ($quayso->save())
                 {
