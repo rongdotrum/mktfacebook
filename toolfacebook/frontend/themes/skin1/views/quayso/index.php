@@ -7,7 +7,7 @@
     <param name="bgcolor" value="#FFFFFF" />
     <param name="play" value="true" />
     <param name="loop" value="true" />
-    <param name="wmode" value="window" />
+    <param name="wmode" value="transparent" />
     <param name="scale" value="showall" />
     <param name="menu" value="true" />
     <param name="devicefont" value="false" />
@@ -21,7 +21,7 @@
         <param name="bgcolor" value="#FFFFFF" />
         <param name="play" value="true" />
         <param name="loop" value="true" />
-        <param name="wmode" value="window" />
+        <param name="wmode" value="transparent" />
         <param name="scale" value="showall" />
         <param name="menu" value="true" />
         <param name="devicefont" value="false" />

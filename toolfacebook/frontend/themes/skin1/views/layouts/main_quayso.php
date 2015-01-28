@@ -24,7 +24,7 @@
             });
         </script>
     </head>
-    <body class="ys_home">    
+    <body class="ys_home" style="background-color: black;">    
         <div id="wrapper">
             <div class="nr">    
                 <div id="home_body">

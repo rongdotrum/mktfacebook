@@ -1,7 +1,7 @@
 <html>
 <head>
 </head>
-<body>
+<body style="background-color: black;">
      <?php echo $content ;?>
 </body>
 </html>
