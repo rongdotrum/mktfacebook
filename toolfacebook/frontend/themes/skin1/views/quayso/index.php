@@ -1,3 +1,6 @@
+<?php
+    Yii::app()->clientScript->registerCoreScript('jquery');
+?>
 <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="752" height="431" id="FlashVars_AS2" align="middle">
     <param name="movie" value="<?php echo app()->request->baseUrl ?>/swf/quayso_ovuong.swf" />
     <param name="quality" value="high" />
@@ -34,12 +37,35 @@
     <!--<![endif]-->
 </object>
 
+<div class="btnshare" style="width:200px;height:100px;border:1px solid black;line-height:100px;text-align: center;cursor:pointer" onclick="sharefb()">Share</div>
 
 
 
 
+<script type="">
+    function sharefb() {       
+        FB.ui({
+            method: 'share',
+            href: 'https://www.facebook.com/mongthienlong.mongvl',
+        }, function(response){          
+            if (typeof(response) == 'undefined' || typeof(response.error_code) != 'undefined') 
+            {
 
-
+            }
+            else
+                {
+                $.ajax({
+                    url: '/quayso/sharefb',                                 
+                    success: function(data)
+                    {
+                        if (data == 1)  
+                            location.reload();
+                    },                    
+                });          
+            }
+        });
+    }
+</script>
 
 
 
