@@ -52,7 +52,11 @@ return CMap::mergeArray(
                 'class' => '\YiiFacebook\SFacebook',
                 'appId'=>'774520229309342', // needed for JS SDK, Social Plugins and PHP SDK
                 'secret'=>'e6d2ee549b19d5d98cae5b6606a68890', // needed for the PHP SDK            
-                'redirectUrl'=>'http://quayso.com/'
+                'redirectUrl'=>'http://quayso.com/',
+                'version'=>'v2.2', // Facebook APi version to default to
+                'locale'=>'vi_VN', // override locale setting (defaults to en_US)
+                'jsSdk'=>true, // don't include JS SDK
+                'async'=>true, // load JS SDK asynchronously
              ),
             'themeManager' => array(
                 'basePath' => 'frontend/themes',
