@@ -37,7 +37,7 @@
     <!--<![endif]-->
 </object>
 
-<div class="btnshare" style="width:200px;height:100px;border:1px solid black;line-height:100px;text-align: center;cursor:pointer" onclick="sharefb()">Share</div>
+<div class="btnshare" style="background-color: white; width:200px;height:100px;border:1px solid black;line-height:100px;text-align: center;cursor:pointer" onclick="sharefb()">Share</div>
 
 
 
