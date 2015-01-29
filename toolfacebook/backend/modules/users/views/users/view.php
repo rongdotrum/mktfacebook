@@ -26,17 +26,10 @@ $this->widget('zii.widgets.CDetailView', array(
         array(
             'label'=>'Tên Hiển Thị',
             'value'=>$model->display_name,
-        ),
-        //	'password',
+        ),        
         'email',
-        'registerdate',
-        'partners.partner_name',
-        'social_name',
-        //'del_flg',
-        array(
-            'label' => 'Trạng Thái',
-            'value' => $model->del_flg == 1 ? "Khóa" : "Mở"
-        ),          
+        'registerdate',      
+        'social_name',        
     ),
 ));
 ?>
@@ -45,8 +38,7 @@ $this->widget('zii.widgets.CDetailView', array(
 $this->widget('bootstrap.widgets.TbButtonGroup', array(
     'type' => 'primary',
     'buttons' => array(
-        array('label' => 'Quản Lý', 'url' => array('index')),
-        array('label' => 'Khóa', 'url' => array('delete'), 'htmlOptions' => array('submit' => array('delete', 'id' => $model->user_id), 'confirm' => 'Are you sure you want to delete this item?')),
+        array('label' => 'Quản Lý', 'url' => array('index')),      
     ),
     'htmlOptions' => array('class' => 'form-actions'),
 ));

@@ -54,14 +54,6 @@ Yii::app()->clientScript->registerScript('lock', '
     or <b>=</b>) at the beginning of each of your search values to specify how the comparison should be done.
 </p>
 
-<?php echo CHtml::link('Advanced Search', '#', array('class' => 'search-button')); ?>
-<div class="search-form" style="display:none">
-    <?php
-    $this->renderPartial('_search', array(
-        'model' => $model,
-    ));
-    ?>
-</div><!-- search-form -->
 
 
 <?php
@@ -70,60 +62,17 @@ $this->widget('zii.widgets.grid.CGridView', array(
     'dataProvider' => $model->search(),
     'filter' => $model,
     'columns' => array(
-// 'user_id',
         array(
             'header' => 'No.',
             'value' => '$this->grid->dataProvider->pagination->currentPage * $this->grid->dataProvider->pagination->pageSize + ($row+1)',
         ),
-        'display_name',
-        //   'password',
-        'email',
-        'activate_status',
-        //  'del_flg',
-        'registerdate',
-        array(
-            'header' => 'Trạng Thái',
-            'name' => 'del_flg',
-            'value' => '$data->del_flg==0?"Mở":"Khóa"',
-            'filter' => CHtml::activeDropDownList($model, 'del_flg', array(0 => 'Mở', 1 => 'Đóng'), array('empty' => ' -- Chọn Trạng Thái -- '))
-        ),
-        'usersource',
-        //'partner_id',
-        array(
-            'header'=>'Parner',
-            'filter'=>CHtml::activeDropDownList($model,'partner_id',GHelpers::getDropDownList('Partners','partner_id','partner_name','status = 1 and del_flg != 1'),array('empty'=>'Lọc Partner')),
-            'value'=>function($data) {
-              if (isset($data->partners->partner_name))  
-                    return $data->partners->partner_name;
-              return $data->partner_id;
-            },
-        ),
-        'partner_key_url',
+        'display_name',        
+        'email',        
+        'registerdate',        
         'social_name',   
         array(
             'class' => 'bootstrap.widgets.TbButtonColumn',
-            'template' => '{view}{lock}{plusgold}{update}{senditem}',
-            'buttons' => array(
-                'lock' => array(
-                    'icon' => 'icon-lock',
-                    'label' => 'Khóa',
-                    'options' => array('class' => 'unlock'),
-                    'url' => 'app()->createUrl("users/users/delete",array("id"=>$data->user_id))',
-                ),
-                'plusgold' => array(
-                    'icon' => 'icon-pencil',
-                    'label' => 'Cộng vàng',
-                    'url' => 'app()->createUrl("users/users/plusgold",array("id"=>$data->user_id))',
-                ),               
-                'update' => array(
-                    'icon' => 'icon-cog'
-                ),
-                'senditem'=> array(
-                    'icon'=>'icon-gift',
-                    'label' => 'Gửi item',
-                    'url' => 'app()->createUrl("users/users/additem",array("id"=>$data->user_id))',
-                )
-            )
+            'template' => '{view}',            
         ),
     ),
 ));
