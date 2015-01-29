@@ -23,7 +23,6 @@ class QuaysoController extends Controller {
         }
 
         if (isset($_POST['game_code']) && $_POST['game_code'] == '!@#cuongma#@!') {
-            die('fsfsdf');
             $username = app()->user->getName();
             $userid = app()->user->getId();
             $quayso = $this->initquayso($userid);
