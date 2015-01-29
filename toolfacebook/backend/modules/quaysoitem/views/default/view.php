@@ -25,6 +25,7 @@ $this->menu=array(
 		'itemname',
 		'count',
 		'percent',
+        'limititem',
         'image',
         'image_hover',
 	),
