@@ -39,10 +39,10 @@ class QuaysoItem extends CActiveRecord {
         return array(
             array('count, typeitem, limititem,percent', 'numerical', 'integerOnly' => true),
             array('itemname', 'length', 'max' => 100),
-            array('codeingame', 'safe'),
+            array('codeingame,image,image_hover', 'safe'),
             // The following rule is used by search().
             // Please remove those attributes that should not be searched.
-            array('itemid, itemname, count, percent, codeingame, typeitem, limititem', 'safe', 'on' => 'search'),
+            array('itemid, itemname, count, percent, codeingame, typeitem, limititem,image,image_hover', 'safe', 'on' => 'search'),
         );
     }
 
@@ -52,7 +52,7 @@ class QuaysoItem extends CActiveRecord {
     public function relations() {
         // NOTE: you may need to adjust the relation name and the related
         // class name for the relations automatically generated below.
-        return array(
+        return array(           
         );
     }
 
