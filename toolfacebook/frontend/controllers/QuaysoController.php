@@ -39,7 +39,10 @@ class QuaysoController extends Controller {
             foreach($item as $key => $value ) {
                 if (isset($value->items->itemname)) {                
                     $pluskey = $value->position;
-                    $str_item .= "&item$pluskey=".urlencode($value->items->count.' '.$value->items->itemname);
+                    if ($value->items->count != 0)
+                    $str_item .= "&item$pluskey=".urlencode($value->items->count.'-'.$value->items->itemname);
+                    else
+                    $str_item .= "&item$pluskey=".urlencode($value->items->itemname);
                 }
             }           
             echo "&share=$shared&username={$user->social_name}&turn=$turn&newday=$newday".$str_item;
@@ -145,18 +148,10 @@ class QuaysoController extends Controller {
             $position = $quayso['position'];
             $nameitem = $item['itemname'];
             $code = $item['codeingame'];
-            $content = $item['count'] . '- ' . $nameitem;
-            if ($item['typeitem'] == 1) {
-                $code = $this->getCode($item['codeingame']);
-                if ($code == '') {
-                    echo("&prize=$position&contentrs=$content&coders=hết code để phát");
-                    die();
-                }
-            }
-
-
-
-
+            if ($item['count'] != 0)
+            $content = $item['count'] . '-' . $nameitem;
+            else
+            $content = $nameitem;
             # tru luot quay so
             $quayso_return = new UsersQuayso();
             $quayso_return = $quayso_return->find('userid=:userid AND turn > 0', array(':userid' => $userid));
