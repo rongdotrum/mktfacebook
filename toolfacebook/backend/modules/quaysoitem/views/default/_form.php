@@ -35,6 +35,11 @@
 		<?php echo $form->error($model,'percent'); ?>
 	</div>
     
+    <div class="row">
+        <?php echo $form->labelEx($model,'limititem'); ?>
+        <?php echo $form->textField($model,'limititem',array('size'=>5,'maxlength'=>5)); ?>
+        <?php echo $form->error($model,'limititem'); ?>
+    </div>
     
     <div class="row">
         <?php echo $form->labelEx($model,'image'); ?>
