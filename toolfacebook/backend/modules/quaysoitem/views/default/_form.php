@@ -15,11 +15,7 @@
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<div class="row">
-		<?php echo $form->labelEx($model,'idingame'); ?>
-		<?php echo $form->textField($model,'idingame'); ?>
-		<?php echo $form->error($model,'idingame'); ?>
-	</div>
+	
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'itemname'); ?>
@@ -38,6 +34,19 @@
 		<?php echo $form->textField($model,'percent',array('size'=>5,'maxlength'=>5)); ?>
 		<?php echo $form->error($model,'percent'); ?>
 	</div>
+    
+    
+    <div class="row">
+        <?php echo $form->labelEx($model,'image'); ?>
+        <?php echo $form->textField($model,'image',array('size'=>5,'maxlength'=>250)); ?>
+        <?php echo $form->error($model,'image'); ?>
+    </div>
+    
+    <div class="row">
+        <?php echo $form->labelEx($model,'image_hover'); ?>
+        <?php echo $form->textField($model,'image_hover',array('size'=>5,'maxlength'=>250)); ?>
+        <?php echo $form->error($model,'image_hover'); ?>
+    </div>
 
 	<div class="row buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
