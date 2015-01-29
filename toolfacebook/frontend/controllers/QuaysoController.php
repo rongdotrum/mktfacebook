@@ -14,14 +14,14 @@ class QuaysoController extends Controller {
         );
     }
 
-    private $maxfree = 3;
+    private $maxfree = 5;
     private $maxshare = 2;
+    private $maxfreeday = 4;
 
     public function actionIndex() {           
         if (app()->user->isGuest) {
             app()->user->setReturnUrl(app()->request->url);
         }
-
         if (isset($_POST['game_code']) && $_POST['game_code'] == '!@#cuongma#@!') {
             $username = app()->user->getName();
             $userid = app()->user->getId();
@@ -31,7 +31,7 @@ class QuaysoController extends Controller {
             if ($turn == 0)
                 $newday = 'Đã hết lượt quay! Hãy chia sẽ cho bạn bè để nhận tiếp lượt quay.';
             else
-                $newday = 'Mẹo nhỏ: Mỗi ngày bạn được nhận 3 lượt quay. Bạn có thể share thêm ' . $this->maxshare . ' lần. Mỗi lần share nhận được ' . $this->maxfree . ' lượt quay miễn phí.' ;
+                $newday = 'Mẹo nhỏ: Mỗi ngày bạn được nhận '. $this->maxfreeday .' lượt quay. Bạn có thể share thêm ' . $this->maxshare . ' lần. Mỗi lần share nhận được ' . $this->maxfree . ' lượt quay miễn phí.' ;
 
             $item = Quayso::model()->findAll();
             $user = Users::model()->findByPk($userid);
@@ -66,7 +66,7 @@ class QuaysoController extends Controller {
         if ($quayso == null) {
             $quayso = new UsersQuayso();
             $quayso->userid = $userid;
-            $quayso->turn = $this->maxfree;
+            $quayso->turn = $this->maxfreeday;
             $quayso->turnfree = 0;
             $quayso->datefree = new CDbExpression('NOW()');
             $quayso->save();
@@ -74,7 +74,7 @@ class QuaysoController extends Controller {
             $datefree = $quayso->datefree;
             $datenow = date('Y-m-d');
             if ($datefree != $datenow) {
-                $quayso->turn = $this->maxfree;
+                $quayso->turn = $this->maxfreeday;
                 $quayso->turnfree = 0;
                 $quayso->datefree = $datenow;
                 $quayso->save();
@@ -144,7 +144,16 @@ class QuaysoController extends Controller {
 
 
             $itemid = $item['itemid'];
-            $quayso = Quayso::model()->find('itemid=:itemid', array(':itemid' => $itemid));
+            $quayso = Quayso::model()->findAll('itemid=:itemid', array(':itemid' => $itemid));
+            
+            //xu ly random khi co 2 vi tri cung 1 item.
+            $count = sizeof($quayso);
+            if ($count == 1)
+                $quayso = $quayso[0];
+            $rd = rand(0, $count - 1);
+            $quayso = $quayso[$rd];
+            //end
+            
             $position = $quayso['position'];
             $nameitem = $item['itemname'];
             $code = $item['codeingame'];
@@ -276,7 +285,7 @@ class QuaysoController extends Controller {
             $quayso = UsersQuayso::model()->find('userid = :uid and (turnfree < :maxshare or turnfree is null) and datefree = date(now())',array(':uid'=>Yii::app()->user->getId(),':maxshare' => $this->maxshare));
             if (isset($quayso->id)) {
                 $quayso->turnfree = $quayso->turnfree + 1;
-                $quayso->turn += 3;
+                $quayso->turn += $this->maxfree;
                 if ($quayso->save())
                 {
                     echo 1;
