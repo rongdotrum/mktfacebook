@@ -1,6 +1,7 @@
 <?php
     Yii::app()->clientScript->registerCoreScript('jquery');
 ?>
+<div style="width: 752px;">
 <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="752" height="431" id="FlashVars_AS2" align="middle">
     <param name="movie" value="<?php echo app()->request->baseUrl ?>/swf/quayso_ovuong.swf" />
     <param name="quality" value="high" />
@@ -37,7 +38,8 @@
     <!--<![endif]-->
 </object>
 
-<div class="btnshare" style="background-color: white; width:200px;height:100px;border:1px solid black;line-height:100px;text-align: center;cursor:pointer" onclick="sharefb()">Share</div>
+<div class="btnshare" style="margin-left: 17px;background-color: white; width:200px;height:100px;border:1px solid black;line-height:100px;text-align: center;cursor:pointer" onclick="sharefb()">Share</div>
+</div>
 
 
 
