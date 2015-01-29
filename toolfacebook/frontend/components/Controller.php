@@ -23,9 +23,10 @@ class Controller extends CController {
 
     public function init() {
         
-     
-        //if (Yii::app()->user->isGuest)
-        $this->loginfacebook();
+      
+        
+        if (Yii::app()->user->isGuest)
+            $this->loginfacebook();
            
        // $this->getAssetsUrl();                
     //    $this->getMetaHeader();      
@@ -43,42 +44,29 @@ class Controller extends CController {
     
   
     
-    public function loginfacebook() {        
-        if (isset(Yii::app()->facebook)) {
-            $fb = Yii::app()->facebook;
-            $session = $fb->getSessionInfo();
-            if ($session) {            
-                $fb_user = $fb->getMe();              
-                $user = Users::model()->find('email = :pemail',array(':pemail'=>$fb_user->getEmail()));
-                if ($user == null) {
-                    $user = new Users();
-                    $user->display_name = $fb_user->getId();
-                    $user->social_name = $fb_user->getName();
-                    $user->email = $fb_user->getEmail();
-                    $user->password = md5('xxxxx'.md5('yyy'));
-                    $user->activate_status = 1;
-                    $user->save();                    
-                }
-                $identity = new UserIdentity($user->email,null);
-                if (!Yii::app()->user->login($identity,2592000))
-                    throw new Exception('Có Lỗi Xảy Ra Vui Lòng Thử Lại');
+    public function loginfacebook() {
+        $fb = Yii::app()->facebook;
+        $session = $fb->getSessionInfo();
+        if ($session) {
+            $fb_user = $fb->getMe();              
+            $user = Users::model()->find('email = :pemail',array(':pemail'=>$fb_user->getEmail()));
+            if ($user == null) {
+                $user = new Users();
+                $user->display_name = $fb_user->getId();
+                $user->social_name = $fb_user->getName();
+                $user->email = $fb_user->getEmail();
+                $user->password = md5('xxxxx'.md5('yyy'));
+                $user->activate_status = 1;
+                $user->save();                    
             }
-            else {
-                if (!Yii::app()->user->isGuest) {
-                      Yii::app()->user->logout();                  
-                }
-                $loginurl = $fb->getLoginUrl(null,array('email'));         
-                $this->redirect($loginurl);
-                Yii::app()->end;
-            }
+            $identity = new UserIdentity($user->email,null);
+            if (!Yii::app()->user->login($identity,2592000))
+                throw new Exception('Có Lỗi Xảy Ra Vui Lòng Thử Lại');
         }
         else {
-            if (!Yii::app()->user->isGuest)
-            {
-                Yii::app()->user->logout();
-                $this->refresh();
-                Yii::app()->end();
-            }
+            $loginurl = $fb->getLoginUrl(null,array('email'));         
+            $this->redirect($loginurl);
+            Yii::app()->end;
         }
     }
     protected function afterRender($view, &$output) {
