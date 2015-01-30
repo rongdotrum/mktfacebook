@@ -7,6 +7,12 @@
 * Date: 7/23/12
 * Time: 12:55 AM
 */
+
+use Facebook\FacebookSession;
+use Facebook\FacebookRequest;
+use Facebook\FacebookRedirectLoginHelper;
+use Facebook\FacebookCanvasLoginHelper; 
+
 class Controller extends CController {
 
     public $breadcrumbs = array();
@@ -20,16 +26,11 @@ class Controller extends CController {
     public $renderTheme = '';
     public $_assetsUrl;
     public $version_assets = 1;
+    public $urlapp = 'https://apps.facebook.com/appquayso';
+    public $idfb = '';
 
     public function init() {
-        
-      
-        
-        if (Yii::app()->user->isGuest)
-            $this->loginfacebook();
-           
-       // $this->getAssetsUrl();                
-    //    $this->getMetaHeader();      
+        $this->loginfacebook();                
         parent::init();
     }
        
@@ -45,35 +46,45 @@ class Controller extends CController {
   
     
     public function loginfacebook() {
-        $fb = Yii::app()->facebook;
-        $session = $fb->getSessionInfo();
-        if ($session) {
-            $fb_user = $fb->getMe();              
-            $user = Users::model()->find('email = :pemail',array(':pemail'=>$fb_user->getEmail()));
-            if ($user == null) {
-                $user = new Users();
-                $user->display_name = $fb_user->getId();
-                $user->social_name = $fb_user->getName();
-                $user->email = $fb_user->getEmail();
-                $user->password = md5('xxxxx'.md5('yyy'));
-                $user->activate_status = 1;
-                $user->save();                    
+            
+            $facebook =  FacebookSession::setDefaultApplication(Yii::app()->params['appfb_id'],Yii::app()->params['appfb_secret']);
+            $helper = new FacebookCanvasLoginHelper();
+            $session = $helper->getSession();                        
+            if ($session){                
+                $request = new FacebookRequest( $session, 'GET', '/me' );
+                $response = $request->execute();                
+                $graphObject = $response->getGraphObject();                  
+                if (Yii::app()->user->getName() != $graphObject->getProperty('id')) 
+                         Yii::app()->user->logout();                
+                $user = Users::model()->find('email = :email',array(':email'=>$graphObject->getProperty('email')));       
+                if (empty($user))
+                {                    
+                    $user = new Users();
+                    $user->email =  $graphObject->getProperty('email');
+                    $user->salt = GHelpers::fetch_random_string();
+                    $user->display_name = $graphObject->getProperty('id');
+                    $user->social_name =  $graphObject->getProperty('name');
+                    $user->registerdate = new CDbExpression('NOW()');                    
+                    $user->usersource = 'Facebook';
+                    $user->activate_status = 1; 
+                    $user->password = md5('xxxxxx'.$user->salt);                                                            
+                    $user->save();                                       
+                }
+
+                $identity = new UserIdentity($user->email,null);
+                    if (!Yii::app()->user->login($identity,2592000)) {
+                        throw new Exception('Có Lỗi Xảy Ra Vui Lòng Thử Lại');                
+                    }                            
+
+            }                
+            if (Yii::app()->user->isGuest) {
+                echo '<script>window.top.location.href = encodeURI("https://www.facebook.com/v2.2/dialog/oauth?client_id='.Yii::app()->params['appfb_id'].'&redirect_uri=' . $this->urlapp . '&display=page&response_type=token&scope=email")</script>';
+                die;
             }
-            $identity = new UserIdentity($user->email,null);
-            if (!Yii::app()->user->login($identity,2592000))
-                throw new Exception('Có Lỗi Xảy Ra Vui Lòng Thử Lại');
-        }
-        else {
-            $loginurl = $fb->getLoginUrl(null,array('email'));         
-            $this->redirect($loginurl);
-            Yii::app()->end;
-        }
     }
-    protected function afterRender($view, &$output) {
-        parent::afterRender($view,$output);
-        //Yii::app()->facebook->addJsCallback($js); // use this if you are registering any additional $js code you want to run on init()
-        Yii::app()->facebook->initJs($output); // this initializes the Facebook JS SDK on all pages
-        // Yii::app()->facebook->renderOGMetaTags(); // this renders the OG tags
+   protected function afterRender($view, &$output) {
+        parent::afterRender($view,$output);       
+        Yii::app()->facebook->initJs($output); // this initializes the Facebook JS SDK on all pages        
         return true;
     }
 
