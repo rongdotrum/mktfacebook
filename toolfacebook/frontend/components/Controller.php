@@ -50,37 +50,33 @@ class Controller extends CController {
             $facebook =  FacebookSession::setDefaultApplication(Yii::app()->params['appfb_id'],Yii::app()->params['appfb_secret']);
             $helper = new FacebookCanvasLoginHelper();
             $session = $helper->getSession();                        
-            if ($session){                
+            if (isset($session)){                
                 $request = new FacebookRequest( $session, 'GET', '/me' );
                 $response = $request->execute();                
-                $graphObject = $response->getGraphObject();                  
-                if (Yii::app()->user->getName() != $graphObject->getProperty('id')) 
-                         Yii::app()->user->logout();                
-                $user = Users::model()->find('email = :email',array(':email'=>$graphObject->getProperty('email')));       
-                if (empty($user))
-                {                    
-                    $user = new Users();
-                    $user->email =  $graphObject->getProperty('email');
-                    $user->salt = GHelpers::fetch_random_string();
-                    $user->display_name = $graphObject->getProperty('id');
-                    $user->social_name =  $graphObject->getProperty('name');
-                    $user->registerdate = new CDbExpression('NOW()');                    
-                    $user->usersource = 'Facebook';
-                    $user->activate_status = 1; 
-                    $user->password = md5('xxxxxx'.$user->salt);                                                            
-                    $user->save();                                       
+                $graphObject = $response->getGraphObject();                             
+                if (!Yii::app()->user->isGuest && Yii::app()->user->getName() != $graphObject->getProperty('id')) 
+                    Yii::app()->user->logout();
+                if (Yii::app()->user->isGuest) {
+                    $user = Users::model()->find('email = :email',array(':email'=>$graphObject->getProperty('email')));        
+                    if (empty($user))
+                    {                    
+                        $user = new Users();
+                        $user->email =  $graphObject->getProperty('email');
+                        $user->salt = GHelpers::fetch_random_string();
+                        $user->display_name = $graphObject->getProperty('id');
+                        $user->social_name =  $graphObject->getProperty('name');
+                        $user->registerdate = new CDbExpression('NOW()');                    
+                        $user->usersource = 'Facebook';
+                        $user->activate_status = 1; 
+                        $user->password = md5('xxxxxx'.$user->salt);                                                            
+                        $user->save();                        
+                    }                
+                    $identity = new UserIdentity($user->email,null);
+                    Yii::app()->user->login($identity,2592000);                            
                 }
-
-                $identity = new UserIdentity($user->email,null);
-                    if (!Yii::app()->user->login($identity,2592000)) {
-                        throw new Exception('Có Lỗi Xảy Ra Vui Lòng Thử Lại');                
-                    }                            
-
-            }                
-            if (Yii::app()->user->isGuest) {
-                echo '<script>window.top.location.href = encodeURI("https://www.facebook.com/v2.2/dialog/oauth?client_id='.Yii::app()->params['appfb_id'].'&redirect_uri=' . $this->urlapp . '&display=page&response_type=token&scope=email")</script>';
-                die;
-            }
+                return true;
+            }                      
+            echo '<script>window.top.location.href = encodeURI("https://www.facebook.com/v2.2/dialog/oauth?client_id='.Yii::app()->params['appfb_id'].'&redirect_uri=' . $this->urlapp . '&display=page&response_type=token&scope=email")</script>';           
     }
    protected function afterRender($view, &$output) {
         parent::afterRender($view,$output);       
