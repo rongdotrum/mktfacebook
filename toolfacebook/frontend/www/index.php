@@ -22,6 +22,7 @@ chdir(dirname(__FILE__) . '/../..');
 require_once('common/lib/Yii/yii.php');
 require_once('common/components/WebApplication.php');
 require_once('common/lib/global.php');
+require_once('common/lib/fbsdk/autoload.php');
 
 $app = Yii::createApplication('WebApplication', require('frontend/config/main.php'));
 
