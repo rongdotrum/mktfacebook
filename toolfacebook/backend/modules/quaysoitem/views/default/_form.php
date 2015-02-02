@@ -40,7 +40,13 @@
         <?php echo $form->textField($model,'limititem',array('size'=>5,'maxlength'=>5)); ?>
         <?php echo $form->error($model,'limititem'); ?>
     </div>
-    
+     <div class="row">
+        <?php echo $form->labelEx($model,'typeitem'); ?>
+        <?php
+         echo $form->dropDownList($model,'typeitem',array(1=>'Trúng Thưởng',0=>'Không Trúng Thưởng'),array('empty'=>'loại item'))
+         ?>
+        <?php echo $form->error($model,'typeitem'); ?>
+    </div>
     <div class="row">
         <?php echo $form->labelEx($model,'image'); ?>
         <?php echo $form->textField($model,'image',array('size'=>5,'maxlength'=>250)); ?>

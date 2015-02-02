@@ -48,6 +48,16 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 		'count',
 		'percent',
         'limititem',
+        array(
+            'name'=>'typeitem',
+            'filter'=>CHtml::activeDropDownList($model,'typeitem',array(1=>'Trúng',0=>'Không Trúng Thưởng'),array('empty'=>'Tất cả')),
+            'value'=>function($data) {
+                if ($data->typeitem==1)
+                    return 'Trúng Thưởng';
+                else
+                    return 'Không Trúng Thưởng';
+            }
+        ),
         'image',
         'image_hover',
 		array(
