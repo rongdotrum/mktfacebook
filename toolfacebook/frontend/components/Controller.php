@@ -75,8 +75,10 @@ class Controller extends CController {
                     Yii::app()->user->login($identity,2592000);                            
                 }
                 return true;
-            }                      
-            echo '<script>window.top.location.href = encodeURI("https://www.facebook.com/v2.2/dialog/oauth?client_id='.Yii::app()->params['appfb_id'].'&redirect_uri=' . $this->urlapp . '&display=page&response_type=token&scope=email")</script>';           
+            }      
+	if (!Yii::app()->request->isAjaxRequest)
+             echo '<script>window.top.location.href = encodeURI("https://www.facebook.com/v2.2/dialog/oauth?client_id='.Yii::app()->params['appfb_id'].'&redirect_uri=' . $this->urlapp . '&display=page&response_type=token&scope=email")</script>';                   
+
     }
    protected function afterRender($view, &$output) {
         parent::afterRender($view,$output);       

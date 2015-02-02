@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -14,8 +14,8 @@ class QuaysoController extends Controller {
         );
     }
 
-    private $maxfree = 5;
-    private $maxshare = 2;
+    private $maxfree = 3;
+    private $maxshare = 1;
     private $maxfreeday = 4;
 
     public function actionIndex() {           
@@ -49,14 +49,20 @@ class QuaysoController extends Controller {
             die();
         } else {                        
             $userid = app()->user->getId();
-            /*$phanthuong = $this->listPhanThuong();
-            $lichsu = $this->listHistory();
-            $toppoint = $this->topGiftPoint();
-            $giftoutgame = $this->giftOutGame();
-            $pointcurrent = $this->pointCurrent();*/
-
-            $this->render('index');
-            //$this->renderPartial('index', array('data' => $data, 'phanthuong' => $phanthuong, 'lichsu' => $lichsu, 'toppoint' => $toppoint, 'giftoutgame' => $giftoutgame, 'pointcurrent' => $pointcurrent, 'thele' => $news), false, true);
+            
+	    $crit = new CDbCriteria();
+            $crit->compare('userid',$userid);
+            $crit->order = 'datequay desc';
+            $logprovider = new CActiveDataProvider('LogQuayso', array(
+                'criteria'=>$crit,                
+                'pagination'=>array(
+                    'pageSize'=>10,
+                ),
+            ));
+              
+            $this->render('index',array('logquayso'=>$logprovider));
+            
+            
             return;
         }
     }
@@ -87,6 +93,7 @@ class QuaysoController extends Controller {
         if (app()->user->isGuest) {
             die();
         }
+        
         if (isset($_POST['game_code']) && $_POST['game_code'] == '!@#cuongma#@!') {
             //kiem tra count quay so trong ngay free > 5?
             //neu > 5 && khong co turn nao từ nạp card
@@ -141,26 +148,29 @@ class QuaysoController extends Controller {
             } else {
             $item = $process->getItemLevel($quaysoitem[4]['percent']);
             } */
-
-
+                      
             $itemid = $item['itemid'];
             $quayso = Quayso::model()->findAll('itemid=:itemid', array(':itemid' => $itemid));
-            
+                        
             //xu ly random khi co 2 vi tri cung 1 item.
             $count = sizeof($quayso);
-            if ($count == 1)
-                $quayso = $quayso[0];
-            $rd = rand(0, $count - 1);
-            $quayso = $quayso[$rd];
-            //end
             
+            if ($count == 1)
+                $quayso = $quayso[0];            
+            else {
+                $rd = rand(0, $count - 1);            
+                $quayso = $quayso[$rd];
+            }
+           
+            //end
+
             $position = $quayso['position'];
             $nameitem = $item['itemname'];
             $code = $item['codeingame'];
             if ($item['count'] != 0)
-            $content = $item['count'] . '-' . $nameitem;
+                $content = $item['count'] . '-' . $nameitem;
             else
-            $content = $nameitem;
+                $content = $nameitem;
             # tru luot quay so
             $quayso_return = new UsersQuayso();
             $quayso_return = $quayso_return->find('userid=:userid AND turn > 0', array(':userid' => $userid));
@@ -168,7 +178,7 @@ class QuaysoController extends Controller {
             $quayso_return->save();
             #end
 
-
+                        
             #luu log quay so
 
             $logquayso = new LogQuayso();
