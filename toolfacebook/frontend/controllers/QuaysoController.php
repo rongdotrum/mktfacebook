@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -16,7 +16,7 @@ class QuaysoController extends Controller {
 
     private $maxfree = 3;
     private $maxshare = 1;
-    private $maxfreeday = 4;
+    private $maxfreeday = 3;
 
     public function actionIndex() {           
         if (app()->user->isGuest) {
