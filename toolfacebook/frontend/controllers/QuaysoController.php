@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -49,9 +49,16 @@ class QuaysoController extends Controller {
             die();
         } else {                        
             $userid = app()->user->getId();
-            
-	    $crit = new CDbCriteria();
+            /** lich su nguoi quay**/
+	        $crit = new CDbCriteria();
             $crit->compare('userid',$userid);
+            $crit->compare('type',1);
+            $crit->compare('status',0);
+            if (isset($_POST['time'])) {
+                $filtertime = date('Y-m-d',strtotime($_POST['time']));                
+                $crit->compare('datequay',$filtertime,true);
+            }
+            
             $crit->order = 'datequay desc';
             $logprovider = new CActiveDataProvider('LogQuayso', array(
                 'criteria'=>$crit,                
@@ -59,8 +66,18 @@ class QuaysoController extends Controller {
                     'pageSize'=>10,
                 ),
             ));
+            
+            /** lich su top 10 **/
+             $sql = 'select * from (select * from log_quayso where status = 0 and type = 1 order by datequay desc) as log group by userid limit 10';
+            $result = Yii::app()->db->createCommand($sql)->queryAll();
+            $logtop = new CArrayDataProvider($result, array(
+                'keyField'=>'LogId',
+                'pagination'=>array(
+                    'pageSize'=>10,
+                ),
+            ));
               
-            $this->render('index',array('logquayso'=>$logprovider));
+            $this->render('index',array('logquayso'=>$logprovider,'logtop'=>$logtop));
             
             
             return;
@@ -74,7 +91,7 @@ class QuaysoController extends Controller {
             $quayso->userid = $userid;
             $quayso->turn = $this->maxfreeday;
             $quayso->turnfree = 0;
-            $quayso->datefree = new CDbExpression('NOW()');
+            $quayso->datefree = date('Y-m-d');//new CDbExpression('NOW()');
             $quayso->save();
         } else {
             $datefree = $quayso->datefree;
@@ -151,7 +168,8 @@ class QuaysoController extends Controller {
                       
             $itemid = $item['itemid'];
             $quayso = Quayso::model()->findAll('itemid=:itemid', array(':itemid' => $itemid));
-                        
+            if ($quayso == null || $quayso == array())   
+				goto randquayso;
             //xu ly random khi co 2 vi tri cung 1 item.
             $count = sizeof($quayso);
             
@@ -185,7 +203,7 @@ class QuaysoController extends Controller {
             $logquayso->userid = $userid;
             $logquayso->username = app()->user->getName();
             $logquayso->content = $content;
-            $logquayso->datequay = new CDbExpression('NOW()');
+            $logquayso->datequay = date('Y-m-d H:i:s');//new CDbExpression('NOW()');
             $logquayso->type = $item['typeitem'];
             $logquayso->quantily = $item['count'];
             $logquayso->codeingame = $code;
@@ -292,15 +310,21 @@ class QuaysoController extends Controller {
 
     public function actionSharefb() {
         if (!Yii::app()->user->isGuest && Yii::app()->request->isAjaxRequest) {
-            $quayso = UsersQuayso::model()->find('userid = :uid and (turnfree < :maxshare or turnfree is null) and datefree = date(now())',array(':uid'=>Yii::app()->user->getId(),':maxshare' => $this->maxshare));
+            $datenow = date('Y-m-d');
+            $quayso = UsersQuayso::model()->find('userid = :uid and (turnfree < :maxshare or turnfree is null) and date(datefree) = :pdate',array(':uid'=>Yii::app()->user->getId(),':maxshare' => $this->maxshare,':pdate'=>$datenow));
             if (isset($quayso->id)) {
                 $quayso->turnfree = $quayso->turnfree + 1;
-                $quayso->turn += $this->maxfree;
+                $quayso->turn += $this->maxfree;                                
                 if ($quayso->save())
                 {
                     echo 1;
                     Yii::app()->end();
                 }
+                else {
+                    echo 2;
+                    Yii::app()->end();
+                }
+                
                     
             }
         }
